@@ -8,13 +8,13 @@
   "icon": "images/icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MrKaos72/odoo-vscode-themes.git",
+    "url": "https://github.com/MrKaos72/vscode-odoo-color-theme.git",
     "directory": "packages/odoo-theme"
   },
   "bugs": {
-    "url": "https://github.com/MrKaos72/odoo-vscode-themes/issues"
+    "url": "https://github.com/MrKaos72/vscode-odoo-color-theme/issues"
   },
-  "homepage": "https://github.com/MrKaos72/odoo-vscode-themes/tree/main/packages/odoo-theme#readme",
+  "homepage": "https://github.com/MrKaos72/vscode-odoo-color-theme/tree/main/packages/odoo-theme#readme",
   "engines": {
     "vscode": "^1.100.0"
   },
