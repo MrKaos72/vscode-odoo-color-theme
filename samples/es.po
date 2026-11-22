@@ -1,0 +1,16 @@
+# Archivo de muestra: traducción (.po) de un módulo de Odoo.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo 17.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+#. module: sale_priority
+#: model:ir.model.fields,field_description:sale_priority.field_sale_order__delivery_note
+msgid "Delivery Note"
+msgstr "Nota de entrega"
+
+#. module: sale_priority
+#: code:addons/sale_priority/models/sale_order.py:0
+#, python-format
+msgid "Margin %(margin)s%% is too high"
+msgstr "El margen %(margin)s%% es demasiado alto"

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Archivo de muestra: vista heredada con xpath y plantilla QWeb -->
+<odoo>
+    <record id="view_order_form_inherit_priority" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.priority</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="priority_level" widget="priority"/>
+                <field name="carrier_partner_id" invisible="state == 'cancel'"/>
+            </xpath>
+            <xpath expr="//page[@name='other_information']" position="inside">
+                <group string="Delivery">
+                    <field name="delivery_note" placeholder="Notes for the carrier..."/>
+                </group>
+            </xpath>
+            <field name="tag_ids" position="attributes">
+                <attribute name="options">{'color_field': 'color'}</attribute>
+            </field>
+        </field>
+    </record>
+
+    <template id="report_saleorder_priority" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//div[@name='informations_reference']" position="after">
+            <div t-if="doc.priority_level == '1'" class="col-auto">
+                <strong>Priority:</strong>
+                <span t-field="doc.priority_level"/>
+            </div>
+            <t t-foreach="doc.tag_ids" t-as="tag">
+                <span class="badge" t-esc="tag.name"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>

@@ -1,0 +1,18 @@
+// Archivo de muestra: estilos SCSS de un módulo de Odoo.
+$o-priority-urgent: #e36c6c;
+$o-priority-gap: 0.5rem;
+
+.o_order_priority {
+    display: inline-flex;
+    gap: $o-priority-gap;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 0.8;
+    }
+
+    .text-danger {
+        color: $o-priority-urgent;
+        font-weight: 600;
+    }
+}
