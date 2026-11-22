@@ -10,5 +10,9 @@
     "check": "npm run check -w odoo-color-theme",
     "test": "npm run test -w odoo-color-theme",
     "package": "npm run package -w odoo-color-theme"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4"
   }
 }
