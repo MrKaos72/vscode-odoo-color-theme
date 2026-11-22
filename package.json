@@ -1,0 +1,14 @@
+{
+  "name": "odoo-vscode-themes",
+  "private": true,
+  "description": "Monorepo: Odoo Color Theme, Odoo Icons (próximamente) y Odoo Extension Pack (próximamente).",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w odoo-color-theme",
+    "check": "npm run check -w odoo-color-theme",
+    "test": "npm run test -w odoo-color-theme",
+    "package": "npm run package -w odoo-color-theme"
+  }
+}
