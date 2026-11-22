@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Archivo de muestra para probar Odoo Color Theme (modelo Python de Odoo).
+# Sample file to try Odoo Color Theme (Odoo Python model).
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 

@@ -67,7 +67,7 @@ const CASES = [
   { file: 'sale_order_views.xml', line: '<template id="report_saleorder_priority"', token: 'template', role: 'tag' },
   { file: 'sale_order_views.xml', line: '<div t-if=', token: 't-if', role: 'attribute' },
   { file: 'sale_order_views.xml', line: '<t t-foreach=', token: 't-foreach', role: 'attribute' },
-  { file: 'sale_order_views.xml', line: '<!-- Archivo de muestra', token: 'Archivo', role: 'comment' },
+  { file: 'sale_order_views.xml', line: '<!-- Sample file', token: 'Sample', role: 'comment' },
 
   // JavaScript (OWL)
   { file: 'order_widget.js', line: 'import { Component, useState', token: 'import', role: 'keyword' },
@@ -79,7 +79,7 @@ const CASES = [
   { file: 'order_widget.js', line: 'this.orm = useService', token: 'this', role: 'self' },
   { file: 'order_widget.js', line: 'this.orm = useService', token: 'useService', role: 'function' },
   { file: 'order_widget.js', line: 'const REFRESH_DELAY', token: '5000', role: 'constant' },
-  { file: 'order_widget.js', line: '// Archivo de muestra', token: 'Archivo', role: 'comment' },
+  { file: 'order_widget.js', line: '// Sample file', token: 'Sample', role: 'comment' },
 ];
 
 const FILE_SCOPES = {

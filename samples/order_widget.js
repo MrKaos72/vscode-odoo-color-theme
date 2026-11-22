@@ -1,5 +1,5 @@
 /** @odoo-module **/
-// Archivo de muestra: componente OWL.
+// Sample file: OWL component.
 import { Component, useState, xml } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";

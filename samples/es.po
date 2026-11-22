@@ -1,4 +1,4 @@
-# Archivo de muestra: traducción (.po) de un módulo de Odoo.
+# Sample file: Spanish translation (.po) of an Odoo module.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 17.0\n"

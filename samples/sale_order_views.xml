@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Archivo de muestra: vista heredada con xpath y plantilla QWeb -->
+<!-- Sample file: inherited view with xpath and a QWeb template -->
 <odoo>
     <record id="view_order_form_inherit_priority" model="ir.ui.view">
         <field name="name">sale.order.form.inherit.priority</field>
