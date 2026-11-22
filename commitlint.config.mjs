@@ -1,4 +1,4 @@
-// Reglas de Conventional Commits para todo el monorepo.
+// Conventional Commits rules for the whole monorepo.
 export default {
   extends: ['@commitlint/config-conventional'],
 };

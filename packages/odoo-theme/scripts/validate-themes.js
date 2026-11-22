@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 'use strict';
-// Valida los temas generados:
-//  1. Cada JSON existe, es válido y está declarado en package.json > contributes.themes.
-//  2. Los archivos están al día con palette.json (no se editaron a mano ni quedaron viejos).
-//  3. Ningún color es "suelto": todo hex (sin alfa) existe en palette.json.
-//  4. Las 4 variantes tienen exactamente las mismas claves de colores y los mismos roles.
-//  5. Formato correcto de valores (#RRGGBB / #RRGGBBAA) y de reglas tokenColors.
-// Uso: node scripts/validate-themes.js
+// Validates the generated themes:
+//  1. Each JSON exists, parses and is declared in package.json > contributes.themes.
+//  2. The files are up to date with palette.json (not edited by hand, not stale).
+//  3. No stray colors: every hex (without alpha) exists in palette.json.
+//  4. All 4 variants have exactly the same color keys and the same roles.
+//  5. Values (#RRGGBB / #RRGGBBAA) and tokenColors rules are well formed.
+// Usage: node scripts/validate-themes.js
 
 const fs = require('fs');
 const path = require('path');
@@ -37,7 +37,7 @@ function main() {
     const rel = `./themes/${themeFileName(id)}`;
     const file = path.join(THEMES_DIR, themeFileName(id));
     if (!fs.existsSync(file)) {
-      fail(`${rel}: no existe (ejecuta npm run build)`);
+      fail(`${rel}: missing (run npm run build)`);
       continue;
     }
 
@@ -45,70 +45,70 @@ function main() {
     try {
       theme = JSON.parse(fs.readFileSync(file, 'utf8'));
     } catch (e) {
-      fail(`${rel}: JSON inválido (${e.message})`);
+      fail(`${rel}: invalid JSON (${e.message})`);
       continue;
     }
 
-    // 1. Declarado en package.json con el label y uiTheme correctos
+    // 1. Declared in package.json with the right label and uiTheme
     const entry = contributed.get(path.normalize(rel));
     const v = palette.variants[id];
-    if (!entry) fail(`${rel}: no está en contributes.themes`);
+    if (!entry) fail(`${rel}: not listed in contributes.themes`);
     else {
       if (entry.label !== v.label) fail(`${rel}: label "${entry.label}" ≠ "${v.label}"`);
       if (entry.uiTheme !== v.uiTheme) fail(`${rel}: uiTheme "${entry.uiTheme}" ≠ "${v.uiTheme}"`);
     }
 
-    // 2. Al día con la paleta
+    // 2. Up to date with the palette
     const expected = buildTheme(palette, id).theme;
-    if (JSON.stringify(expected) !== JSON.stringify(theme)) fail(`${rel}: desactualizado respecto a palette.json (ejecuta npm run build)`);
+    if (JSON.stringify(expected) !== JSON.stringify(theme)) fail(`${rel}: out of date with palette.json (run npm run build)`);
 
-    // 3 y 5. Formato y origen de cada color
+    // 3 and 5. Format and origin of every color
     for (const [key, value] of Object.entries(theme.colors)) {
-      if (!isHex(value)) fail(`${rel}: colors.${key} tiene formato inválido "${value}"`);
-      else if (!paletteHexes.has(baseHex(value))) fail(`${rel}: colors.${key} = ${value} no sale de palette.json`);
+      if (!isHex(value)) fail(`${rel}: colors.${key} has an invalid format "${value}"`);
+      else if (!paletteHexes.has(baseHex(value))) fail(`${rel}: colors.${key} = ${value} does not come from palette.json`);
     }
     theme.tokenColors.forEach((rule, i) => {
-      if (!Array.isArray(rule.scope) || rule.scope.length === 0) fail(`${rel}: tokenColors[${i}] sin scopes`);
+      if (!Array.isArray(rule.scope) || rule.scope.length === 0) fail(`${rel}: tokenColors[${i}] has no scopes`);
       const fg = rule.settings && rule.settings.foreground;
-      if (fg && !paletteHexes.has(baseHex(fg))) fail(`${rel}: tokenColors[${i}] (${rule.name}) = ${fg} no sale de palette.json`);
-      if (!rule.settings || (!fg && rule.settings.fontStyle === undefined)) fail(`${rel}: tokenColors[${i}] sin settings`);
+      if (fg && !paletteHexes.has(baseHex(fg))) fail(`${rel}: tokenColors[${i}] (${rule.name}) = ${fg} does not come from palette.json`);
+      if (!rule.settings || (!fg && rule.settings.fontStyle === undefined)) fail(`${rel}: tokenColors[${i}] has no settings`);
     });
     for (const [sel, s] of Object.entries(theme.semanticTokenColors)) {
-      if (s.foreground && !paletteHexes.has(baseHex(s.foreground))) fail(`${rel}: semanticTokenColors.${sel} no sale de palette.json`);
+      if (s.foreground && !paletteHexes.has(baseHex(s.foreground))) fail(`${rel}: semanticTokenColors.${sel} does not come from palette.json`);
     }
-    if (theme.semanticHighlighting !== true) fail(`${rel}: semanticHighlighting debe ser true`);
+    if (theme.semanticHighlighting !== true) fail(`${rel}: semanticHighlighting must be true`);
 
-    // 4. Mismas claves en todas las variantes
+    // 4. Same keys in every variant
     const keys = Object.keys(theme.colors).sort().join('|');
     const roles = theme.tokenColors.map((r) => r.name).join('|');
     if (referenceKeys === null) {
       referenceKeys = keys;
       referenceRoles = roles;
     } else {
-      if (keys !== referenceKeys) fail(`${rel}: el conjunto de claves de colors difiere del de las demás variantes`);
-      if (roles !== referenceRoles) fail(`${rel}: los roles de tokenColors difieren de los de las demás variantes`);
+      if (keys !== referenceKeys) fail(`${rel}: the set of color keys differs from the other variants`);
+      if (roles !== referenceRoles) fail(`${rel}: the tokenColors roles differ from the other variants`);
     }
 
-    console.log(`✔ ${theme.name.padEnd(16)} ${Object.keys(theme.colors).length} colores, ${theme.tokenColors.length} reglas, ${Object.keys(theme.semanticTokenColors).length} semantic tokens`);
+    console.log(`✔ ${theme.name.padEnd(16)} ${Object.keys(theme.colors).length} colors, ${theme.tokenColors.length} rules, ${Object.keys(theme.semanticTokenColors).length} semantic tokens`);
   }
 
-  // Gramática de inyección declarada y legible
+  // Injection grammar is declared and readable
   for (const g of pkg.contributes.grammars || []) {
     const gp = path.join(PACKAGE_DIR, g.path);
     try {
       const grammar = JSON.parse(fs.readFileSync(gp, 'utf8'));
-      if (grammar.scopeName !== g.scopeName) fail(`${g.path}: scopeName no coincide con package.json`);
+      if (grammar.scopeName !== g.scopeName) fail(`${g.path}: scopeName does not match package.json`);
     } catch (e) {
-      fail(`${g.path}: no se puede leer (${e.message})`);
+      fail(`${g.path}: cannot be read (${e.message})`);
     }
   }
 
   if (errors.length) {
-    console.error(`\n✖ ${errors.length} problema(s):`);
+    console.error(`\n✖ ${errors.length} problem(s):`);
     errors.forEach((e) => console.error(`  - ${e}`));
     process.exit(1);
   }
-  console.log('\n✔ Temas válidos: sin colores sueltos, al día con palette.json y con las mismas claves en las 4 variantes');
+  console.log('\n✔ Themes are valid: no stray colors, up to date with palette.json and the same keys in all 4 variants');
 }
 
 main();

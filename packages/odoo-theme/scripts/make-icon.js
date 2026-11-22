@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 'use strict';
-// Genera images/icon.png (128x128) con los colores de palette.json, sin dependencias:
-// cuadrado redondeado morado con un anillo "o" teal. El PNG se codifica a mano con zlib.
-// Uso: node scripts/make-icon.js
+// Generates images/icon.png (128x128) from palette.json colors, with no dependencies:
+// a purple rounded square with a teal "o" ring. The PNG is encoded by hand with zlib.
+// Usage: node scripts/make-icon.js
 
 const fs = require('fs');
 const path = require('path');
@@ -11,7 +11,7 @@ const { PACKAGE_DIR, loadPalette, mergeVariant, resolveColors } = require('./lib
 const { parseHex } = require('./lib/color');
 
 const SIZE = 128;
-const SAMPLES = 4; // supermuestreo por eje para suavizar bordes
+const SAMPLES = 4; // supersampling per axis to smooth edges
 
 function crc32(buf) {
   let c;
@@ -37,13 +37,13 @@ function chunk(type, data) {
 function encodePng(rgba, w, h) {
   const raw = Buffer.alloc((w * 4 + 1) * h);
   for (let y = 0; y < h; y++) {
-    raw[y * (w * 4 + 1)] = 0; // filtro "none"
+    raw[y * (w * 4 + 1)] = 0; // "none" filter
     rgba.copy(raw, y * (w * 4 + 1) + 1, y * w * 4, (y + 1) * w * 4);
   }
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(w, 0);
   ihdr.writeUInt32BE(h, 4);
-  ihdr[8] = 8; // bits por canal
+  ihdr[8] = 8; // bits per channel
   ihdr[9] = 6; // RGBA
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
@@ -53,7 +53,7 @@ function encodePng(rgba, w, h) {
   ]);
 }
 
-// Distancia con signo a un rectángulo redondeado centrado (negativa = dentro).
+// Signed distance to a centered rounded rectangle (negative = inside).
 function roundedRectSdf(x, y, half, radius) {
   const qx = Math.abs(x) - half + radius;
   const qy = Math.abs(y) - half + radius;
@@ -77,17 +77,17 @@ function main() {
         for (let sx = 0; sx < SAMPLES; sx++) {
           const x = px + (sx + 0.5) / SAMPLES - c;
           const y = py + (sy + 0.5) / SAMPLES - c;
-          if (roundedRectSdf(x, y, 60, 26) > 0) continue; // fuera del ícono: transparente
+          if (roundedRectSdf(x, y, 60, 26) > 0) continue; // outside the icon: transparent
           const d = Math.hypot(x, y + 2);
           let col = bg;
-          if (d >= 22 && d <= 38) col = ring; // anillo "o"
-          if (Math.hypot(x - 36, y - 36) <= 7) col = dot; // punto, guiño al logo
+          if (d >= 22 && d <= 38) col = ring; // "o" ring
+          if (Math.hypot(x - 36, y - 36) <= 7) col = dot; // dot, a nod to the logo
           r += col.r; g += col.g; b += col.b; a += 255;
         }
       }
       const n = SAMPLES * SAMPLES;
       const i = (py * SIZE + px) * 4;
-      // Se guarda el color no premultiplicado.
+      // Store the non-premultiplied color.
       const cover = a / 255;
       rgba[i] = cover ? r / cover : 0;
       rgba[i + 1] = cover ? g / cover : 0;

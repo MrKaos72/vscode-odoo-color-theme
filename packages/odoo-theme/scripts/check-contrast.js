@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 'use strict';
-// Verifica el contraste WCAG AA (4.5:1) de texto y tokens contra su fondo en las 4 variantes.
-// Usa los temas construidos en memoria desde palette.json (lo mismo que escribe build-themes),
-// así puede decir qué nombre de la paleta falla y proponer un valor que sí pase.
+// Checks WCAG AA contrast (4.5:1) of text and tokens against their background in all 4 variants.
+// It uses the themes built in memory from palette.json (the same output build-themes writes),
+// so it can name the palette color that fails and suggest a value that passes.
 //
-// Uso: node scripts/check-contrast.js [--verbose]
-// Sale con código 1 si algún par no alcanza el mínimo.
+// Usage: node scripts/check-contrast.js [--verbose]
+// Exits with code 1 if any pair is below the minimum.
 
 const { loadPalette, buildTheme } = require('./lib/palette');
 const { blend, contrastRatio, suggestColor } = require('./lib/color');
@@ -13,11 +13,11 @@ const { blend, contrastRatio, suggestColor } = require('./lib/color');
 const MIN_RATIO = 4.5;
 const verbose = process.argv.includes('--verbose');
 
-// Pares [primer plano, fondo] de la interfaz que muestran texto.
-// Quedan fuera a propósito (no son texto o son estados inactivos, exentos en WCAG 1.4.3):
-//   bordes, guías de indentación, editorLineNumber.foreground (inactivo),
+// [foreground, background] pairs of UI elements that display text.
+// Deliberately excluded (not text, or inactive states, which WCAG 1.4.3 exempts):
+//   borders, indent guides, editorLineNumber.foreground (inactive),
 //   titleBar.inactiveForeground, tab.unfocused*, activityBar.inactiveForeground,
-//   editorWhitespace, editorGhostText, scrollbars y fondos de selección/búsqueda.
+//   editorWhitespace, editorGhostText, scrollbars and selection/find backgrounds.
 const UI_PAIRS = [
   ['editor.foreground', 'editor.background'],
   ['editor.foreground', 'editor.lineHighlightBackground'],
@@ -91,17 +91,17 @@ const UI_PAIRS = [
   ['list.warningForeground', 'sideBar.background'],
 ];
 
-// Colores ANSI que se espera que sean ilegibles sobre el fondo del terminal
-// (negro sobre fondo oscuro, blancos sobre fondo claro): se usan como fondo, no como texto.
+// ANSI colors that are expected to be unreadable on the terminal background
+// (black on dark, whites on light): they are used as backgrounds, not as text.
 const ANSI_SKIP = {
   dark: ['terminal.ansiBlack'],
   light: ['terminal.ansiWhite', 'terminal.ansiBrightWhite'],
 };
 
-// Roles de sintaxis que no tienen color propio (solo estilo) o que no son texto relevante.
+// Syntax roles without a color of their own (style only).
 const SYNTAX_SKIP = new Set(['markupBold', 'markupItalic']);
 
-// Fondo opaco efectivo: si el color tiene alfa se compone sobre editor.background.
+// Effective opaque color: a color with alpha is composited over the given background.
 function opaque(hex, under) {
   return hex.length === 9 ? blend(hex, under) : hex;
 }
@@ -119,7 +119,7 @@ function checkVariant(palette, id) {
     results.push({ label, bgLabel, fg, bg, ratio, ok: ratio >= MIN_RATIO, sourceName, bgHexesForSuggest: bgHexesForSuggest || [bg] });
   };
 
-  // 1) Interfaz
+  // 1) UI
   for (const [fgKey, bgKey] of UI_PAIRS) {
     if (!c[fgKey] || !c[bgKey]) {
       results.push({ label: fgKey, bgLabel: bgKey, missing: true, ok: false });
@@ -135,14 +135,14 @@ function checkVariant(palette, id) {
     add(key, c[key], c['terminal.background'], origin.colors[key].name, 'terminal.background');
   }
 
-  // 3) Sintaxis: cada rol contra el fondo del editor y contra la línea resaltada.
+  // 3) Syntax: each role against the editor background and the line highlight.
   const lineBg = opaque(c['editor.lineHighlightBackground'], editorBg);
   const seen = new Set();
   for (const rule of theme.tokenColors) {
     const fg = rule.settings.foreground;
     if (!fg || SYNTAX_SKIP.has(rule.name)) continue;
     const key = `${fg}`;
-    if (seen.has(key)) continue; // mismo color ya evaluado
+    if (seen.has(key)) continue; // same color already checked
     seen.add(key);
     const both = [editorBg, lineBg];
     add(`token:${rule.name}`, fg, editorBg, origin.syntax[rule.name].name, 'editor.background', both);
@@ -160,25 +160,25 @@ function main() {
     const { theme, results } = checkVariant(palette, id);
     const failed = results.filter((r) => !r.ok);
     failures += failed.length;
-    console.log(`\n${failed.length ? '✖' : '✔'} ${theme.name}: ${results.length - failed.length}/${results.length} pares cumplen ${MIN_RATIO}:1`);
+    console.log(`\n${failed.length ? '✖' : '✔'} ${theme.name}: ${results.length - failed.length}/${results.length} pairs meet ${MIN_RATIO}:1`);
 
     const rows = verbose ? results : failed;
     for (const r of rows) {
       if (r.missing) {
-        console.log(`   FALTA  ${r.label} / ${r.bgLabel} (clave no definida)`);
+        console.log(`   MISSING ${r.label} / ${r.bgLabel} (key not defined)`);
         continue;
       }
       const status = r.ok ? '  OK  ' : ' FAIL ';
-      let line = `  ${status} ${r.ratio.toFixed(2).padStart(5)}:1  ${r.label} ${r.fg} sobre ${r.bgLabel} ${r.bg}  [palette: $${r.sourceName}]`;
+      let line = `  ${status} ${r.ratio.toFixed(2).padStart(5)}:1  ${r.label} ${r.fg} on ${r.bgLabel} ${r.bg}  [palette: $${r.sourceName}]`;
       if (!r.ok) {
         const suggestion = suggestColor(r.fg, r.bgHexesForSuggest, MIN_RATIO);
-        if (suggestion) line += `  → sugerido ${suggestion}`;
+        if (suggestion) line += `  → suggested ${suggestion}`;
       }
       console.log(line);
     }
   }
 
-  console.log(failures ? `\n✖ ${failures} par(es) por debajo de ${MIN_RATIO}:1` : `\n✔ Todas las variantes cumplen WCAG AA (${MIN_RATIO}:1)`);
+  console.log(failures ? `\n✖ ${failures} pair(s) below ${MIN_RATIO}:1` : `\n✔ All variants meet WCAG AA (${MIN_RATIO}:1)`);
   process.exit(failures ? 1 : 0);
 }
 

@@ -1,4 +1,4 @@
-# CI: valida el tema en cada push a main y en cada pull request.
+# CI: validates the theme on every push to main and on every pull request.
 name: CI
 
 on:
@@ -15,8 +15,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # Commit de microsoft/vscode del que se toman las gramáticas integradas (Python, XML, JS)
-  # para el test de resaltado. Corresponde a VS Code 1.147.0; actualízalo al subir de versión.
+  # microsoft/vscode commit that provides the built-in grammars (Python, XML, JS) for the
+  # highlighting test. It matches VS Code 1.147.0; bump it when upgrading.
   VSCODE_GRAMMARS_REF: 8a14f0cc1b08d531eb83255ea3764ae22aa932b5
 
 jobs:
@@ -42,7 +42,7 @@ jobs:
       - name: Themes are committed and up to date
         run: |
           if ! git diff --exit-code -- packages/odoo-theme/themes; then
-            echo "::error::Los temas de themes/ no coinciden con palette.json. Ejecuta 'npm run build' y commitea el resultado."
+            echo "::error::The themes in themes/ do not match palette.json. Run 'npm run build' and commit the result."
             exit 1
           fi
 

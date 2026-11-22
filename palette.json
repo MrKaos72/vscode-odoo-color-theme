@@ -1,5 +1,5 @@
 {
-  "$comment": "Fuente única de colores del monorepo (tema + íconos). 'colors' es lo único que admite hex literales; 'workbench' y 'syntax' solo admiten referencias '$nombre' o '$nombre/AA' (AA = alfa en hex). Las variantes con 'extends' heredan todo y solo sobrescriben lo que declaran.",
+  "$comment": "Single source of truth for the monorepo's colors (theme + icons). 'colors' is the only block that accepts hex literals; 'workbench' and 'syntax' only accept '$name' or '$name/AA' references (AA = alpha in hex). Variants with 'extends' inherit everything and only override what they declare.",
   "variants": {
     "dark": {
       "label": "Odoo Dark",

@@ -1,15 +1,15 @@
 'use strict';
-// Asignación de roles de sintaxis (definidos en palette.json > syntax) a scopes de TextMate
-// y a selectores de semantic tokens. Aquí no hay colores: solo nombres de scopes.
+// Maps syntax roles (defined in palette.json > syntax) to TextMate scopes and semantic token
+// selectors. No colors here: only scope names.
 //
-// Notas importantes:
-// - Los scopes de Python son los que emite hoy la gramática integrada de VS Code (MagicPython).
-// - NO se definen reglas genéricas para `variable` ni `variable.other`: los semantic tokens de
-//   Pylance (`variable`, `property`) caen a los scopes `variable.other.readwrite` y
-//   `variable.other.property`, y una regla genérica taparía el color de la gramática de
-//   inyección de Odoo (`_inherit`, `_name`, ...).
-// - Tampoco se usa `variable.other.constant` genérico, porque la gramática de JS lo emite para
-//   todo `const` y TypeScript hace caer ahí `variable.readonly`.
+// Important notes:
+// - Python scopes are the ones VS Code's built-in grammar (MagicPython) emits today.
+// - There are NO generic rules for `variable` or `variable.other`: Pylance semantic tokens
+//   (`variable`, `property`) fall back to the `variable.other.readwrite` and
+//   `variable.other.property` scopes, and a generic rule would override the color from the
+//   Odoo injection grammar (`_inherit`, `_name`, ...).
+// - Generic `variable.other.constant` is not used either: the JS grammar emits it for every
+//   `const`, and TypeScript's `variable.readonly` falls back to it.
 
 const SCOPES = {
   comment: ['comment', 'punctuation.definition.comment'],
@@ -71,12 +71,12 @@ const SCOPES = {
     'support.variable.magic.python',
     'keyword.other.unit',
     'constant.other.color',
-    // Prefijos numéricos de Python (0x, 0o, 1j): si no, caerían en storage.type = keyword.
+    // Python numeric prefixes (0x, 0o, 1j): otherwise they would fall into storage.type = keyword.
     'storage.type.number.python',
     'storage.type.imaginary.number.python',
   ],
 
-  // Scope propio emitido por syntaxes/odoo-python.injection.json.
+  // Custom scope emitted by syntaxes/odoo-python.injection.json.
   orm: ['variable.other.constant.orm.odoo'],
 
   decorator: [
@@ -122,7 +122,7 @@ const SCOPES = {
   cssProperty: ['support.type.property-name', 'support.type.vendored.property-name'],
   cssVariable: ['variable.scss', 'variable.css', 'variable.argument.css'],
 
-  // Markdown (README, docs de módulos)
+  // Markdown (READMEs, module docs)
   markupHeading: ['markup.heading', 'entity.name.section.markdown'],
   markupBold: ['markup.bold'],
   markupItalic: ['markup.italic'],
@@ -135,7 +135,7 @@ const SCOPES = {
 
   invalid: ['invalid', 'invalid.illegal'],
 
-  // CSV: scopes de la extensión Rainbow CSV (VS Code no trae gramática de CSV).
+  // CSV: scopes from the Rainbow CSV extension (VS Code ships no CSV grammar).
   csv1: ['rainbow1'],
   csv2: ['keyword.rainbow2'],
   csv3: ['entity.name.function.rainbow3'],
@@ -148,10 +148,10 @@ const SCOPES = {
   csv10: ['invalid.rainbow10'],
 };
 
-// Semantic tokens (Pylance, TypeScript/JavaScript). El valor es el rol de sintaxis.
+// Semantic tokens (Pylance, TypeScript/JavaScript). The value is the syntax role.
 const SEMANTIC = {
-  // Referencias a clases (fields.Char, models.Model, Component) = tipos;
-  // la declaración (class SaleOrder) = color de clase.
+  // Class references (fields.Char, models.Model, Component) = types;
+  // the declaration (class SaleOrder) = class color.
   'class': 'type',
   'class.declaration': 'class',
   'class.defaultLibrary': 'type',

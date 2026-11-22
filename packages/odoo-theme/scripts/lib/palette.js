@@ -1,6 +1,6 @@
 'use strict';
-// Carga palette.json (raíz del monorepo), resuelve herencia y referencias, y construye
-// los objetos de tema en memoria. Lo usan build-themes, check-contrast y validate-themes.
+// Loads palette.json (monorepo root), resolves inheritance and references, and builds
+// the theme objects in memory. Used by build-themes, check-contrast and validate-themes.
 
 const fs = require('fs');
 const path = require('path');
@@ -11,7 +11,7 @@ const PACKAGE_DIR = path.resolve(__dirname, '..', '..');
 const PALETTE_PATH = path.resolve(PACKAGE_DIR, '..', '..', 'palette.json');
 const THEMES_DIR = path.join(PACKAGE_DIR, 'themes');
 
-// "$nombre" o "$nombre/AA"
+// "$name" or "$name/AA"
 const REF_RE = /^\$([A-Za-z][A-Za-z0-9]*)(?:\/([0-9a-fA-F]{2}))?$/;
 
 function loadPalette() {
@@ -22,11 +22,11 @@ function themeFileName(variantId) {
   return `odoo-${variantId}-color-theme.json`;
 }
 
-// Fusiona una variante con su padre ('extends'), recursivamente.
+// Merges a variant with its parent ('extends'), recursively.
 function mergeVariant(palette, id, seen = new Set()) {
   const v = palette.variants[id];
-  if (!v) throw new Error(`Variante desconocida: ${id}`);
-  if (seen.has(id)) throw new Error(`Herencia circular en la variante ${id}`);
+  if (!v) throw new Error(`Unknown variant: ${id}`);
+  if (seen.has(id)) throw new Error(`Circular inheritance in variant ${id}`);
   seen.add(id);
   const parent = v.extends ? mergeVariant(palette, v.extends, seen) : { colors: {}, workbench: {}, syntax: {} };
   return {
@@ -40,18 +40,18 @@ function mergeVariant(palette, id, seen = new Set()) {
   };
 }
 
-// Resuelve el bloque 'colors': cada valor es un hex o una referencia a otro nombre.
+// Resolves the 'colors' block: each value is a hex or a reference to another name.
 function resolveColors(rawColors, variantId) {
   const out = {};
   const resolving = new Set();
   const resolve = (name) => {
     if (out[name]) return out[name];
     const raw = rawColors[name];
-    if (raw === undefined) throw new Error(`[${variantId}] color no definido: "${name}"`);
+    if (raw === undefined) throw new Error(`[${variantId}] undefined color: "${name}"`);
     if (isHex(raw)) return (out[name] = raw.toUpperCase());
     const m = REF_RE.exec(raw);
-    if (!m) throw new Error(`[${variantId}] valor inválido en colors.${name}: "${raw}"`);
-    if (resolving.has(name)) throw new Error(`[${variantId}] referencia circular en colors.${name}`);
+    if (!m) throw new Error(`[${variantId}] invalid value in colors.${name}: "${raw}"`);
+    if (resolving.has(name)) throw new Error(`[${variantId}] circular reference in colors.${name}`);
     resolving.add(name);
     const base = resolve(m[1]);
     resolving.delete(name);
@@ -61,19 +61,19 @@ function resolveColors(rawColors, variantId) {
   return out;
 }
 
-// Resuelve una referencia de workbench/syntax. Un hex literal aquí es un "color suelto": error.
+// Resolves a workbench/syntax reference. A hex literal here is a "stray color": error.
 function resolveRef(value, colors, where) {
-  if (isHex(value)) throw new Error(`${where}: color suelto "${value}". Usa una referencia $nombre de palette.json`);
+  if (isHex(value)) throw new Error(`${where}: stray color "${value}". Use a $name reference from palette.json`);
   const m = REF_RE.exec(value);
-  if (!m) throw new Error(`${where}: referencia inválida "${value}"`);
+  if (!m) throw new Error(`${where}: invalid reference "${value}"`);
   const base = colors[m[1]];
-  if (!base) throw new Error(`${where}: el color "$${m[1]}" no existe en la variante`);
+  if (!base) throw new Error(`${where}: color "$${m[1]}" does not exist in this variant`);
   const hex = m[2] ? base.slice(0, 7) + m[2].toUpperCase() : base;
   return { hex, name: m[1], alpha: m[2] || null };
 }
 
-// Construye el tema de una variante. Devuelve el JSON del tema y el origen de cada color
-// (qué nombre de la paleta lo produjo), útil para los informes de contraste.
+// Builds the theme of a variant. Returns the theme JSON and the origin of each color
+// (which palette name produced it), used by the contrast report.
 function buildTheme(palette, variantId) {
   const merged = mergeVariant(palette, variantId);
   const workbenchMap = { ...palette.workbench, ...merged.workbench };
@@ -102,17 +102,17 @@ function buildTheme(palette, variantId) {
 
   const tokenColors = [];
   for (const [role, scopes] of Object.entries(SCOPES)) {
-    if (!roleSettings[role]) throw new Error(`[${variantId}] el rol "${role}" de token-map.js no existe en palette.json > syntax`);
+    if (!roleSettings[role]) throw new Error(`[${variantId}] role "${role}" from token-map.js does not exist in palette.json > syntax`);
     tokenColors.push({ name: role, scope: scopes, settings: roleSettings[role] });
   }
   for (const role of Object.keys(roleSettings)) {
-    if (!SCOPES[role]) throw new Error(`[${variantId}] el rol "${role}" no tiene scopes en token-map.js`);
+    if (!SCOPES[role]) throw new Error(`[${variantId}] role "${role}" has no scopes in token-map.js`);
   }
 
   const semanticTokenColors = {};
   for (const [selector, role] of Object.entries(SEMANTIC)) {
     const s = roleSettings[role];
-    if (!s) throw new Error(`[${variantId}] semantic "${selector}" apunta al rol inexistente "${role}"`);
+    if (!s) throw new Error(`[${variantId}] semantic "${selector}" points to unknown role "${role}"`);
     const entry = {};
     if (s.foreground) entry.foreground = s.foreground;
     if (s.fontStyle) entry.fontStyle = s.fontStyle;

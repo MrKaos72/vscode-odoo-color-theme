@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 'use strict';
-// Test de resaltado: tokeniza los archivos de samples/ con las gramáticas que trae la instalación
-// local de VS Code (MagicPython, XML, JavaScript) + nuestra inyección de Odoo, aplica cada tema
-// y comprueba que tokens concretos reciben el color del rol esperado.
+// Highlighting test: tokenizes the files in samples/ with the grammars shipped with the local
+// VS Code installation (MagicPython, XML, JavaScript) plus our Odoo injection, applies each theme
+// and checks that specific tokens get the color of the expected role.
 //
-// Requiere las devDependencies vscode-textmate y vscode-oniguruma (solo para testear; el build
-// de los temas no tiene dependencias).
-// Si VS Code no está en una ruta estándar: VSCODE_EXTENSIONS_DIR=<...>/resources/app/extensions
-// Uso: node scripts/test-grammar.js [--verbose]
+// Requires the vscode-textmate and vscode-oniguruma devDependencies (testing only; building
+// the themes has no dependencies).
+// If VS Code is not in a standard location: VSCODE_EXTENSIONS_DIR=<...>/resources/app/extensions
+// Usage: node scripts/test-grammar.js [--verbose]
 
 const fs = require('fs');
 const path = require('path');
@@ -19,8 +19,8 @@ const { PACKAGE_DIR, loadPalette, buildTheme } = require('./lib/palette');
 const SAMPLES_DIR = path.resolve(PACKAGE_DIR, '..', '..', 'samples');
 const verbose = process.argv.includes('--verbose');
 
-// Cada caso: archivo, texto que identifica la línea, token buscado (n-ésima aparición) y rol esperado.
-// role "fg" = sin regla (color por defecto del editor). "scope" verifica además un scope concreto.
+// Each case: file, text that identifies the line, token to look for (first occurrence) and expected role.
+// role "fg" = no rule (default editor color). "scope" additionally checks for a specific scope.
 const CASES = [
   // Python
   { file: 'sale_order_extension.py', line: '# -*- coding', token: 'coding', role: 'comment' },
@@ -88,7 +88,7 @@ const FILE_SCOPES = {
   '.js': 'source.js',
 };
 
-// --- Localizar las gramáticas integradas de VS Code ---------------------------------------
+// --- Locate VS Code built-in grammars ----------------------------------------------------
 function findVSCodeExtensionsDir() {
   if (process.env.VSCODE_EXTENSIONS_DIR) return process.env.VSCODE_EXTENSIONS_DIR;
   const candidates = [];
@@ -98,21 +98,21 @@ function findVSCodeExtensionsDir() {
       const real = fs.realpathSync(bin);
       const root = path.dirname(path.dirname(real));
       candidates.push(path.join(root, 'resources', 'app', 'extensions'));
-      // Layout nuevo en Windows: <root>/<commit>/resources/app/extensions
+      // Newer Windows layout: <root>/<commit>/resources/app/extensions
       for (const d of fs.readdirSync(root)) candidates.push(path.join(root, d, 'resources', 'app', 'extensions'));
     }
-  } catch { /* code no está en el PATH */ }
+  } catch { /* code is not on PATH */ }
   candidates.push(
     '/Applications/Visual Studio Code.app/Contents/Resources/app/extensions',
     '/usr/share/code/resources/app/extensions',
     '/usr/lib/code/extensions',
   );
   const found = candidates.find((p) => fs.existsSync(path.join(p, 'python', 'package.json')));
-  if (!found) throw new Error('No se encontró la instalación de VS Code. Define VSCODE_EXTENSIONS_DIR.');
+  if (!found) throw new Error('VS Code installation not found. Set VSCODE_EXTENSIONS_DIR.');
   return found;
 }
 
-// scopeName -> ruta del archivo de gramática, leyendo contributes.grammars de cada extensión.
+// scopeName -> grammar file path, read from each extension's contributes.grammars.
 function indexGrammars(extDir) {
   const map = new Map();
   for (const ext of fs.readdirSync(extDir)) {
@@ -128,7 +128,7 @@ function indexGrammars(extDir) {
   return map;
 }
 
-// --- Tokenización ---------------------------------------------------------------------------
+// --- Tokenization ---------------------------------------------------------------------------
 async function createRegistry(grammarFiles) {
   const wasm = fs.readFileSync(path.join(path.dirname(require.resolve('vscode-oniguruma')), 'onig.wasm')).buffer;
   await oniguruma.loadWASM(wasm);
@@ -145,7 +145,7 @@ async function createRegistry(grammarFiles) {
   });
 }
 
-// Constantes de vscode-textmate (EncodedTokenAttributes): bits del color de primer plano.
+// vscode-textmate constants (EncodedTokenAttributes): foreground color bits.
 const FOREGROUND_MASK = 0b00000000111111111000000000000000;
 const FOREGROUND_OFFSET = 15;
 
@@ -179,14 +179,14 @@ function scopesAt(lineData, offset) {
 
 async function main() {
   const extDir = findVSCodeExtensionsDir();
-  console.log(`Gramáticas de VS Code: ${extDir}`);
+  console.log(`VS Code grammars: ${extDir}`);
   const registry = await createRegistry(indexGrammars(extDir));
   const palette = loadPalette();
 
   const grammars = {};
   for (const scope of new Set(Object.values(FILE_SCOPES))) {
     grammars[scope] = await registry.loadGrammar(scope);
-    if (!grammars[scope]) throw new Error(`No se pudo cargar la gramática ${scope}`);
+    if (!grammars[scope]) throw new Error(`Could not load grammar ${scope}`);
   }
 
   let failures = 0;
@@ -211,9 +211,9 @@ async function main() {
       if (!cache[key]) cache[key] = tokenizeFile(grammars[FILE_SCOPES[ext]], fs.readFileSync(path.join(SAMPLES_DIR, c.file), 'utf8'));
       const lineData = cache[key].find((l) => l.line.includes(c.line));
       const label = `${c.file} «${c.token}»`;
-      if (!lineData) { console.log(`  ✖ ${label}: no se encontró la línea "${c.line}"`); failures++; continue; }
-      const offset = lineData.line.indexOf(c.token); // primera aparición en la línea
-      if (offset < 0) { console.log(`  ✖ ${label}: token no encontrado en la línea`); failures++; continue; }
+      if (!lineData) { console.log(`  ✖ ${label}: line "${c.line}" not found`); failures++; continue; }
+      const offset = lineData.line.indexOf(c.token); // first occurrence in the line
+      if (offset < 0) { console.log(`  ✖ ${label}: token not found in the line`); failures++; continue; }
 
       const got = colorAt(lineData, offset, colorMap);
       const want = roleColor[c.role].toUpperCase();
@@ -224,17 +224,17 @@ async function main() {
         if (verbose) console.log(`  ✔ ${label} → ${c.role} ${got}  [${scopes.slice(1).join(' ')}]`);
       } else {
         failures++;
-        console.log(`  ✖ [${theme.name}] ${label}: esperado ${c.role} ${want}, obtenido ${got}${scopeOk ? '' : `, falta scope ${c.scope}`}\n      scopes: ${scopes.join(' ')}`);
+        console.log(`  ✖ [${theme.name}] ${label}: expected ${c.role} ${want}, got ${got}${scopeOk ? '' : `, missing scope ${c.scope}`}\n      scopes: ${scopes.join(' ')}`);
       }
     }
-    console.log(`${ok === CASES.length ? '✔' : '✖'} ${theme.name}: ${ok}/${CASES.length} tokens con el color esperado`);
+    console.log(`${ok === CASES.length ? '✔' : '✖'} ${theme.name}: ${ok}/${CASES.length} tokens with the expected color`);
   }
 
   if (failures) {
-    console.error(`\n✖ ${failures} caso(s) fallidos`);
+    console.error(`\n✖ ${failures} case(s) failed`);
     process.exit(1);
   }
-  console.log('\n✔ Resaltado correcto en las 4 variantes (incluida la inyección de Odoo)');
+  console.log('\n✔ Highlighting is correct in all 4 variants (including the Odoo injection)');
 }
 
 main().catch((err) => {

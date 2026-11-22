@@ -1,7 +1,7 @@
 {
   "name": "odoo-vscode-themes",
   "private": true,
-  "description": "Monorepo: Odoo Color Theme, Odoo Icons (próximamente) y Odoo Extension Pack (próximamente).",
+  "description": "Monorepo: Odoo Color Theme, Odoo Icons (coming soon) and Odoo Extension Pack (coming soon).",
   "workspaces": [
     "packages/*"
   ],

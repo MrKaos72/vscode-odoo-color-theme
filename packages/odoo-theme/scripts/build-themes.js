@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
-// Genera themes/odoo-*-color-theme.json a partir de palette.json (raíz del monorepo).
-// Uso: node scripts/build-themes.js
+// Generates themes/odoo-*-color-theme.json from palette.json (monorepo root).
+// Usage: node scripts/build-themes.js
 
 const fs = require('fs');
 const path = require('path');
@@ -15,13 +15,13 @@ function main() {
     const { theme } = buildTheme(palette, id);
     const file = path.join(THEMES_DIR, themeFileName(id));
     fs.writeFileSync(file, JSON.stringify(theme, null, 2) + '\n', 'utf8');
-    console.log(`✔ ${theme.name.padEnd(16)} → themes/${path.basename(file)} (${Object.keys(theme.colors).length} colores, ${theme.tokenColors.length} reglas de sintaxis)`);
+    console.log(`✔ ${theme.name.padEnd(16)} → themes/${path.basename(file)} (${Object.keys(theme.colors).length} colors, ${theme.tokenColors.length} syntax rules)`);
   }
 }
 
 try {
   main();
 } catch (err) {
-  console.error(`✖ Error al generar los temas: ${err.message}`);
+  console.error(`✖ Failed to build the themes: ${err.message}`);
   process.exit(1);
 }

@@ -1,5 +1,5 @@
 'use strict';
-// Utilidades de color compartidas por los scripts. Sin dependencias externas.
+// Color utilities shared by the scripts. No external dependencies.
 
 const HEX_RE = /^#([0-9a-fA-F]{6})([0-9a-fA-F]{2})?$/;
 
@@ -7,10 +7,10 @@ function isHex(value) {
   return typeof value === 'string' && HEX_RE.test(value);
 }
 
-// Convierte "#RRGGBB" o "#RRGGBBAA" en { r, g, b, a } (r,g,b en 0-255, a en 0-1).
+// Converts "#RRGGBB" or "#RRGGBBAA" into { r, g, b, a } (r,g,b in 0-255, a in 0-1).
 function parseHex(hex) {
   const m = HEX_RE.exec(hex);
-  if (!m) throw new Error(`Color hex inválido: ${hex}`);
+  if (!m) throw new Error(`Invalid hex color: ${hex}`);
   const n = m[1];
   return {
     r: parseInt(n.slice(0, 2), 16),
@@ -25,12 +25,12 @@ function toHex({ r, g, b }) {
   return `#${h(r)}${h(g)}${h(b)}`.toUpperCase();
 }
 
-// Quita el canal alfa: "#RRGGBBAA" -> "#RRGGBB".
+// Drops the alpha channel: "#RRGGBBAA" -> "#RRGGBB".
 function baseHex(hex) {
   return hex.slice(0, 7).toUpperCase();
 }
 
-// Compone un color con alfa sobre un fondo opaco.
+// Composites a color with alpha over an opaque background.
 function blend(fgHex, bgHex) {
   const fg = parseHex(fgHex);
   const bg = parseHex(bgHex);
@@ -42,7 +42,7 @@ function blend(fgHex, bgHex) {
   });
 }
 
-// Luminancia relativa según WCAG 2.x.
+// Relative luminance as defined by WCAG 2.x.
 function luminance(hex) {
   const { r, g, b } = parseHex(hex);
   const lin = (c) => {
@@ -92,8 +92,8 @@ function hslToRgb({ h, s, l }) {
   return { r: hue(p, q, h + 1 / 3) * 255, g: hue(p, q, h) * 255, b: hue(p, q, h - 1 / 3) * 255 };
 }
 
-// Busca el color más cercano (mismo tono y saturación, cambiando solo la luminosidad)
-// que alcance el contraste objetivo contra todos los fondos indicados.
+// Finds the closest color (same hue and saturation, changing only lightness)
+// that reaches the target contrast against every given background.
 function suggestColor(fgHex, bgHexes, target) {
   const hsl = rgbToHsl(parseHex(fgHex));
   const bgs = Array.isArray(bgHexes) ? bgHexes : [bgHexes];

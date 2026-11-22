@@ -1,4 +1,4 @@
-# Solo se publican themes/, syntaxes/, images/icon.png, README, CHANGELOG y LICENSE.
+# Only themes/, syntaxes/, images/icon.png, README, CHANGELOG and LICENSE are published.
 scripts/**
 node_modules/**
 .vscode/**

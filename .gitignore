@@ -1,4 +1,4 @@
 node_modules/
 *.vsix
-# Gramáticas de VS Code descargadas por el CI para el test de resaltado
+# VS Code grammars downloaded by CI for the highlighting test
 .vscode-grammars/
