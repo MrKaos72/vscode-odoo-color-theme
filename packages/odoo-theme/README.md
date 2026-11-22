@@ -1,177 +1,105 @@
 # Odoo Color Theme
 
-Un color theme para desarrolladores de Odoo, inspirado en los colores de marca de Odoo: **morado `#714B67`** y **teal `#017E84`**. Está pensado para el trabajo diario con modelos Python, vistas XML/QWeb y componentes OWL.
+**A VS Code theme made for Odoo developers.** It brings Odoo's purple and teal to your editor and highlights Odoo code the way you read it: models, fields, views and OWL components.
 
-> 🎨 Este paquete es **solo el color theme**. Los íconos de archivos (**Odoo Icons**) se publican como una extensión aparte, y habrá un **Odoo Extension Pack** que instale las dos.
+![Odoo Dark](https://raw.githubusercontent.com/MrKaos72/vscode-odoo-color-theme/main/packages/odoo-theme/images/screenshot-dark.png)
 
-## Variantes
+## Who it's for
 
-| Tema | Base | Descripción |
-|---|---|---|
-| **Odoo Dark** | `vs-dark` | La variante principal: activity bar morada y status bar teal. |
-| **Odoo Light** | `vs` | Inspirada en el backend de Odoo 17. |
-| **Odoo Midnight** | `vs-dark` | Un Dark más profundo con tinte morado. |
-| **Odoo Community** | `vs-dark` | Dark con los acentos invertidos: el teal es el principal y el morado el secundario. |
+Odoo Color Theme is for anyone who spends the day inside an Odoo addon:
 
-## Capturas sugeridas
+- **Backend developers** writing models, computed fields, constraints and wizards in Python.
+- **Functional and technical consultants** customizing forms, reports and QWeb templates in XML.
+- **Frontend developers** building OWL components, widgets and SCSS styles.
+- **Partners, freelancers and in-house teams** working on Community or Enterprise who want a comfortable, consistent editor that feels at home with Odoo.
 
-<!-- Sustituir por las capturas reales antes de publicar:
-![Odoo Dark](images/screenshot-dark.png)
-![Odoo Light](images/screenshot-light.png)
-![Odoo Midnight](images/screenshot-midnight.png)
-![Odoo Community](images/screenshot-community.png)
--->
+If you're used to Odoo's backend, the colors will feel familiar from the first file you open.
 
-Antes de publicar conviene preparar estas capturas, todas con los archivos de `samples/` del repositorio:
+## Four variants, one palette
 
-1. `images/screenshot-dark.png`: **Odoo Dark** con `sale_order_extension.py` abierto y el explorador visible. Deben verse `_inherit`, `fields.Many2one`, `@api.depends` y `self`.
-2. `images/screenshot-light.png`: **Odoo Light** con `sale_order_views.xml` (`<xpath>`, `position`, `t-foreach`).
-3. `images/screenshot-midnight.png`: **Odoo Midnight** con `order_widget.js` (OWL) y el terminal abierto.
-4. `images/screenshot-community.png`: **Odoo Community** con un diff de Git, para mostrar las decoraciones y la status bar.
+### Odoo Dark
+The main theme, shown at the top of this page. A warm dark background with a purple activity bar, a teal status bar and soft, readable syntax colors.
 
-## Qué se resalta
+### Odoo Light
+A bright theme inspired by the Odoo 17 backend: clean white editor, light gray panels and the same purple and teal accents.
 
-- **Python / ORM**:
-  - keywords, clases, métodos, strings, constantes
-  - decoradores `@api.*`
-  - `self`/`cls` en itálica
-  - `fields.*` y `models.*` como tipos
-  - atributos ORM (`_name`, `_inherit`, `_inherits`, `_description`, `_order`, `_rec_name`, `_table`, …) con color propio
-- **XML / QWeb**: etiquetas (`<record>`, `<field>`, `<xpath>`, `<template>`), atributos (`name`, `model`, `position`, `expr`, `t-if`, `t-foreach`) y valores.
-- **JavaScript (OWL)**, **SCSS** y **Markdown** con la misma paleta.
-- **CSV** (`ir.model.access.csv`): VS Code no trae gramática para CSV. Instala [Rainbow CSV](https://marketplace.visualstudio.com/items?itemName=mechatroner.rainbow-csv) y el tema colorea sus columnas con la paleta de Odoo.
-- **.po / .pot**: hace falta una extensión de gettext (por ejemplo *gettext* de mrorz). El tema colorea sus scopes genéricos: comentarios, keywords y strings.
-- **Semantic highlighting** activado, con colores para Pylance y TypeScript. Las referencias a clases (`fields.Char`, `ValidationError`, `Component`) se pintan como tipos y las declaraciones (`class SaleOrder`) como clases.
+![Odoo Light](https://raw.githubusercontent.com/MrKaos72/vscode-odoo-color-theme/main/packages/odoo-theme/images/screenshot-light.png)
 
-### Sobre los atributos ORM
+### Odoo Midnight
+A deeper, darker take on Odoo Dark with a subtle purple tint. Great for late sessions and OLED screens.
 
-La gramática de Python de VS Code no distingue `_inherit = 'sale.order'` de cualquier otra variable: los dos son un identificador sin scope. Tampoco distingue `fields.Char(...)` de una llamada a función cualquiera.
+![Odoo Midnight](https://raw.githubusercontent.com/MrKaos72/vscode-odoo-color-theme/main/packages/odoo-theme/images/screenshot-midnight.png)
 
-Por eso la extensión incluye una pequeña **gramática de inyección** (`syntaxes/odoo-python.injection.json`) que asigna scopes propios a esas construcciones:
+### Odoo Community
+Odoo Dark with the accents flipped: teal leads and purple supports.
 
-| Construcción | Scope |
-|---|---|
-| `_name`, `_inherit`, `_inherits`, `_description`, `_order`, `_rec_name`, `_table` y otros atributos ORM, cuando se asignan al inicio de una línea | `variable.other.constant.orm.odoo` |
-| `fields.X`, `models.Model`, `models.TransientModel`, `models.AbstractModel` | `support.type.odoo` |
+![Odoo Community](https://raw.githubusercontent.com/MrKaos72/vscode-odoo-color-theme/main/packages/odoo-theme/images/screenshot-community.png)
 
-Limitaciones conocidas:
-- La detección es léxica. Una variable que se llame `_name`, aunque no esté dentro de una clase de Odoo, también recibe el color ORM.
-- Si importas los campos con otro nombre (`from odoo import fields as f`), `f.Char` no se reconoce.
+## Features
 
-## Instalación
+### Highlighting that understands Odoo
+- **ORM attributes stand out.** `_name`, `_inherit`, `_inherits`, `_description`, `_order`, `_rec_name`, `_table` and friends get their own color, so you can see at a glance what a model is and what it extends.
+- **Fields read like types.** `fields.Char`, `fields.Many2one`, `models.Model` and `models.TransientModel` are colored as types, apart from ordinary function calls.
+- **Decorators are easy to spot.** `@api.depends`, `@api.onchange`, `@api.constrains` and `@api.model` show in their own color.
+- **`self` and `cls` in italics**, so the record you're working on is always easy to find.
 
-- **Marketplace**: busca *Odoo Color Theme* en la vista de extensiones (`Ctrl+Shift+X`) o ejecuta `ext install MrKaos.odoo-color-theme`.
-- **Open VSX** (VSCodium, Gitpod, Cursor…): busca *Odoo Color Theme* en el registro de Open VSX.
-- **Desde un `.vsix`**: `code --install-extension odoo-color-theme-0.1.0.vsix`.
+### Views, templates and the web client
+- **XML views and QWeb**: tags such as `<record>`, `<field>`, `<xpath>` and `<template>`, attributes such as `position`, `expr`, `t-if` and `t-foreach`, and their values each have a distinct color.
+- **OWL and JavaScript**, **SCSS** and **Markdown** use the same palette, so every file in your addon looks consistent.
 
-Después abre *Preferences: Color Theme* (`Ctrl+K Ctrl+T`) y elige una de las variantes *Odoo*.
+### Comfortable for long sessions
+- **Readable by design.** Every text and syntax color meets the WCAG AA contrast guideline against its background in all four variants.
+- **Works with Pylance.** Semantic highlighting is enabled and tuned, so the colors stay consistent with Python's language server on.
+- **The whole workbench is themed**: sidebar, tabs, menus, notifications, terminal colors, diff and merge views, Git decorations and bracket pair colorization.
 
-## Personalización
+## Installation
 
-Puedes sobrescribir cualquier color en `settings.json`, solo para una variante o para todas.
+1. Open the Extensions view (`Ctrl+Shift+X` / `Cmd+Shift+X`).
+2. Search for **Odoo Color Theme** and click **Install**.
+3. Open **Preferences: Color Theme** (`Ctrl+K Ctrl+T` / `Cmd+K Cmd+T`) and pick **Odoo Dark**, **Odoo Light**, **Odoo Midnight** or **Odoo Community**.
+
+Using VSCodium, Cursor, Gitpod or another editor based on Open VSX? The theme is available on [Open VSX](https://open-vsx.org) too.
+
+## Tips
+
+- **Access rights CSV files** (`ir.model.access.csv`): install [Rainbow CSV](https://marketplace.visualstudio.com/items?itemName=mechatroner.rainbow-csv) and each column is colored with the Odoo palette.
+- **Translation files** (`.po` / `.pot`): install a gettext syntax extension to get comments, `msgid` and `msgstr` highlighted.
+
+## Make it yours
+
+Want a different status bar or bold ORM attributes? Override any color in your `settings.json`, just for the Odoo variant you use:
 
 ```jsonc
 {
-  // Colores de la interfaz
   "workbench.colorCustomizations": {
     "[Odoo Dark]": {
-      "statusBar.background": "#714B67",
-      "editor.lineHighlightBackground": "#2E262C"
+      "statusBar.background": "#714B67"
     }
   },
-
-  // Colores de sintaxis (TextMate)
   "editor.tokenColorCustomizations": {
     "[Odoo Dark]": {
-      "comments": "#A39AA1",
       "textMateRules": [
         {
-          // Atributos ORM en negrita
           "scope": "variable.other.constant.orm.odoo",
           "settings": { "fontStyle": "bold" }
-        },
-        {
-          // Quitar la itálica de self/cls
-          "scope": ["variable.language.special.self.python", "variable.language.special.cls.python"],
-          "settings": { "fontStyle": "" }
         }
       ]
-    }
-  },
-
-  // Colores de semantic tokens (Pylance)
-  "editor.semanticTokenColorCustomizations": {
-    "[Odoo Dark]": {
-      "rules": { "selfParameter": { "fontStyle": "" } }
     }
   }
 }
 ```
 
-Para saber qué scope tiene un token, usa *Developer: Inspect Editor Tokens and Scopes*.
+## Coming soon
 
----
+- **Odoo Icons**: file icons for Odoo addons (manifests, models, views, security files…), as a separate extension.
+- **Odoo Extension Pack**: one install for the theme and the icons.
 
-## Desarrollo
+## Feedback
 
-La extensión vive en un monorepo:
+Found a color that doesn't look right, or a piece of Odoo code that deserves better highlighting? [Open an issue](https://github.com/MrKaos72/vscode-odoo-color-theme/issues). Ideas and contributions are welcome on [GitHub](https://github.com/MrKaos72/vscode-odoo-color-theme).
 
-```
-palette.json                ← fuente única de colores (tema + íconos)
-samples/                    ← archivos de Odoo para probar el tema
-packages/odoo-theme/        ← esta extensión
-packages/odoo-icons/        ← (próximamente)
-packages/odoo-pack/         ← (próximamente)
-```
-
-Los JSON de `themes/` **no se editan a mano**: se generan desde `palette.json`.
-
-| Comando (en `packages/odoo-theme`) | Qué hace |
-|---|---|
-| `npm run build` | Genera los 4 temas desde `palette.json`. No usa dependencias. |
-| `npm run check` | Comprueba el contraste WCAG AA (`check-contrast.js`) y valida los temas (`validate-themes.js`). |
-| `npm run test:grammar` | Tokeniza `samples/` con las gramáticas de tu VS Code y verifica los colores. |
-| `npm test` | Ejecuta build, check y test:grammar. |
-| `npm run build:icon` | Regenera `images/icon.png` con los colores de la paleta. |
-| `npm run package` | Ejecuta build y check, y genera el `.vsix`. |
-
-`node scripts/check-contrast.js --verbose` muestra todos los pares evaluados. Si alguno falla, el script indica qué nombre de `palette.json` hay que corregir y propone un valor que sí pasa.
-
-### Probar en local (F5)
-
-1. Abre la **carpeta raíz del monorepo** en VS Code y ejecuta `npm install`.
-2. Pulsa **F5** y elige la configuración **Run Odoo Theme**. Se regeneran los temas y se abre un *Extension Development Host* con la carpeta `samples/`.
-3. En esa ventana, abre *Preferences: Color Theme* y prueba las 4 variantes.
-4. Si cambias `palette.json`, ejecuta `npm run build` y recarga la ventana de pruebas (*Developer: Reload Window*).
-
-También puedes lanzarlo sin F5:
-
-```bash
-code --extensionDevelopmentPath="$(pwd)/packages/odoo-theme" samples
-```
-
-### Publicar
-
-Antes de publicar, añade las capturas en `images/`.
-
-**VS Code Marketplace**
-1. Crea un publisher en <https://marketplace.visualstudio.com/manage> con el mismo id que pongas en `publisher`.
-2. Crea un *Personal Access Token* en Azure DevOps (organización *All accessible organizations*, scope **Marketplace › Manage**).
-3. Ejecuta:
-   ```bash
-   npx vsce login MrKaos
-   npm run package            # genera odoo-color-theme-<versión>.vsix
-   npm run publish:vsce       # o: npx vsce publish patch|minor|major
-   ```
-
-**Open VSX**
-1. Entra en <https://open-vsx.org> con GitHub, firma el *Publisher Agreement* y genera un token en *Settings › Access Tokens*.
-2. Crea el namespace una sola vez y publica:
-   ```bash
-   npx ovsx create-namespace MrKaos -p <token>
-   npx ovsx publish odoo-color-theme-0.1.0.vsix -p <token>
-   ```
-
-## Licencia
+## License
 
 [MIT](LICENSE)
+
+*Odoo Color Theme is a community project. It is not affiliated with or endorsed by Odoo S.A.*
