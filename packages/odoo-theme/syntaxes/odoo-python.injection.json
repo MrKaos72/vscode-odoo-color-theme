@@ -1,0 +1,43 @@
+{
+  "$comment": "Gramática de inyección para Python. Da scopes propios a construcciones de Odoo que la gramática integrada (MagicPython) deja sin distinguir: atributos ORM de clase (_name, _inherit, ...) y referencias a fields.* / models.*.",
+  "scopeName": "source.python.odoo-injection",
+  "injectionSelector": "L:source.python -string -comment",
+  "patterns": [
+    { "include": "#orm-attribute" },
+    { "include": "#odoo-type-call" },
+    { "include": "#odoo-type-ref" }
+  ],
+  "repository": {
+    "orm-attribute": {
+      "comment": "Atributo ORM asignado al inicio de línea: `_inherit = 'sale.order'`.",
+      "match": "^\\s*(_name|_inherit|_inherits|_description|_order|_rec_name|_rec_names_search|_table|_auto|_log_access|_parent_name|_parent_store|_check_company_auto|_sql_constraints|_transient|_abstract|_register|_fold_name|_active_name|_date_name|_mail_post_access|_primary_email)\\s*(?==(?!=))",
+      "captures": {
+        "1": { "name": "variable.other.constant.orm.odoo" }
+      }
+    },
+    "odoo-type-call": {
+      "comment": "Llamada `fields.Char(...)` / `models.Model(...)`. Se reutilizan los argumentos de MagicPython para no perder el resaltado de kwargs.",
+      "name": "meta.function-call.odoo.python",
+      "begin": "\\b(fields|models)\\s*(\\.)\\s*([A-Z][A-Za-z0-9_]*)\\s*(?=\\()",
+      "beginCaptures": {
+        "1": { "name": "support.type.odoo" },
+        "2": { "name": "punctuation.separator.period.python" },
+        "3": { "name": "support.type.odoo" }
+      },
+      "end": "(\\))",
+      "endCaptures": {
+        "1": { "name": "punctuation.definition.arguments.end.python" }
+      },
+      "patterns": [{ "include": "source.python#function-arguments" }]
+    },
+    "odoo-type-ref": {
+      "comment": "Referencia sin llamada: `class X(models.Model)`, `isinstance(f, fields.Many2one)`, `fields.Command.create`.",
+      "match": "\\b(fields|models)\\s*(\\.)\\s*([A-Z][A-Za-z0-9_]*)\\b",
+      "captures": {
+        "1": { "name": "support.type.odoo" },
+        "2": { "name": "punctuation.separator.period.python" },
+        "3": { "name": "support.type.odoo" }
+      }
+    }
+  }
+}
