@@ -1,0 +1,102 @@
+# CI: valida el tema en cada push a main y en cada pull request.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Commit de microsoft/vscode del que se toman las gramáticas integradas (Python, XML, JS)
+  # para el test de resaltado. Corresponde a VS Code 1.147.0; actualízalo al subir de versión.
+  VSCODE_GRAMMARS_REF: 8a14f0cc1b08d531eb83255ea3764ae22aa932b5
+
+jobs:
+  theme:
+    name: Build, check & package theme
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build themes from palette.json
+        run: npm run build -w odoo-color-theme
+
+      - name: Themes are committed and up to date
+        run: |
+          if ! git diff --exit-code -- packages/odoo-theme/themes; then
+            echo "::error::Los temas de themes/ no coinciden con palette.json. Ejecuta 'npm run build' y commitea el resultado."
+            exit 1
+          fi
+
+      - name: Contrast (WCAG AA) and theme validation
+        run: npm run check -w odoo-color-theme
+
+      - name: Fetch VS Code built-in grammars
+        uses: actions/checkout@v7
+        with:
+          repository: microsoft/vscode
+          ref: ${{ env.VSCODE_GRAMMARS_REF }}
+          path: .vscode-grammars
+          sparse-checkout: |
+            extensions/python
+            extensions/xml
+            extensions/javascript
+          sparse-checkout-cone-mode: true
+          persist-credentials: false
+
+      - name: Syntax highlighting test
+        run: npm run test:grammar -w odoo-color-theme
+        env:
+          VSCODE_EXTENSIONS_DIR: ${{ github.workspace }}/.vscode-grammars/extensions
+
+      - name: Package VSIX
+        working-directory: packages/odoo-theme
+        run: npx vsce package --no-dependencies
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: odoo-color-theme-vsix
+          path: packages/odoo-theme/*.vsix
+          if-no-files-found: error
+          retention-days: 14
+
+  commitlint:
+    name: Conventional Commits
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint commit messages
+        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
